@@ -17,18 +17,9 @@ test("run a failed shell cmd", async () => {
   expect(stderr.toString()).toEqual("bun: command not found: bunnn\n");
 });
 
-test("run a failed shell cmd and throw error", async () => {
-  $.throws(true);
-  try {
-    await $`bunnn`.quiet();
-  } catch (e) {
-    expect(e.exitCode).toEqual(1);
-    expect(e.stdout.toString()).toEqual("");
-    expect(e.stderr.toString()).toEqual("bun: command not found: bunnn\n");
-  }
-});
 
 test("text(): if exitCode == 0, return stdout else throw error", async () => {
+
   // ok
   const stdoutText = await $`echo hi`.quiet().text();
   expect(stdoutText).toEqual("hi\n");
@@ -47,3 +38,22 @@ test("text(base64)", async () => {
   const base64 = await $`echo hi`.quiet().text("base64");
   expect(base64).toEqual("aGkK");
 });
+
+test("run a failed cmd and redirect stderr to stdout", async () => {
+  const { stdout, stderr, exitCode } = await $`bunnn 2>&1`.quiet();
+  expect(exitCode).toEqual(1);
+  expect(stdout.toString()).toEqual("bun: command not found: bunnn\n");
+  expect(stderr.toString()).toEqual("");
+});
+
+test("run a failed shell cmd and throw error", async () => {
+  $.throws(true);
+  try {
+    await $`bunnn`.quiet();
+  } catch (e) {
+    expect(e.exitCode).toEqual(1);
+    expect(e.stdout.toString()).toEqual("");
+    expect(e.stderr.toString()).toEqual("bun: command not found: bunnn\n");
+  }
+});
+
